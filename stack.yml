@@ -1,0 +1,13 @@
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root1234
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 6666:6666
