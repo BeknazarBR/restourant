@@ -2,6 +2,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 import { DataSourceOptions } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 dotenv.config();
 
@@ -40,8 +41,11 @@ class ConfigService {
       username: this.getValue('POSTGRES_USER'),
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
+      namingStrategy: new SnakeNamingStrategy(),
 
-      entities: ['src/**/entities/*.entity{.ts,.js}'],
+      entities: ['src/**/entities/*.entity{ .ts,.js}'],
+      autoLoadEntities: true,
+      synchronize: true,
 
       migrationsTableName: 'migration',
 
@@ -61,7 +65,7 @@ class ConfigService {
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
 
-      entities: ['src/**/entities/*.entity{.ts,.js}'],
+      entities: ['src/**/entities/*.entity{ .ts,.js}'],
 
       migrationsTableName: 'migration',
 

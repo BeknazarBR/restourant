@@ -4,12 +4,12 @@ import {
   Param,
   Post,
   Put,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
-import { CreateFileDto } from './dto/create-file.dto';
 
 @Controller('file')
 export class FileController {
@@ -17,13 +17,7 @@ export class FileController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const data = new CreateFileDto();
-
-    data.contentType = file.mimetype;
-    data.buffer = file.buffer;
-    data.size = file.size;
-
-    return this.service.create(data);
+    return this.service.create(file);
   }
 
   @Put(':name')
@@ -32,18 +26,12 @@ export class FileController {
     @Param('name') name: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const data = new CreateFileDto();
-
-    data.contentType = file.mimetype;
-    data.buffer = file.buffer;
-    data.size = file.size;
-    data.name = name;
-
-    return this.service.update(data);
+    return this.service.update(name, file);
   }
 
   @Get(':name')
-  getFile(@Param('name') name: string) {
-    return this.service.get(name);
+  getFile(@Param('name') name: string, @Res() res) {
+    const file = this.service.get(name);
+    file.pipe(res);
   }
 }

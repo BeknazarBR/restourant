@@ -14,25 +14,31 @@ export class FileService extends BaseService<File> {
     super(repository);
   }
 
-  async create(data: CreateFileDto): Promise<File> {
-    try {
-      const result = await fileAdapter.put(data.buffer);
-      data.name = result.name;
-      return super.create(data);
-    } catch (e) {
-      throw ApiError.internal(e);
+  async create(file: Express.Multer.File): Promise<File> {
+    if (!file) {
+      throw ApiError.badRequest('file must be attached');
     }
+    const result = await fileAdapter.put(file.buffer);
+    const data = new CreateFileDto();
+    console.log('result', result);
+    data.name = result.name;
+    data.size = file.size;
+    data.contentType = file.mimetype;
+
+    return super.create(data);
   }
 
-  async update(data: CreateFileDto): Promise<File> {
-    const isExists = fileAdapter.isExists(data.name);
+  async update(name: string, file: Express.Multer.File): Promise<File> {
+    const isExists = fileAdapter.isExists(name);
     if (!isExists) {
       throw ApiError.notFound('file not found');
     }
     try {
-      const result = await fileAdapter.put(data.buffer, data);
-      data.name = result.name;
-      return super.create(data);
+      const instance = await this.findOneBy({ name });
+      await fileAdapter.put(file.buffer, { name });
+      instance.size = file.size;
+      instance.contentType = file.mimetype;
+      return super.updateOne(instance.id, instance);
     } catch (e) {
       throw ApiError.internal(e);
     }
